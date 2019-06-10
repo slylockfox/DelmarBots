@@ -7,7 +7,7 @@ import pickle
 
 from jetbot import Robot
 
-position_tolerance = 10
+position_tolerance = 40
 view_position_center = 125
 swivel_speed = 0.2
 
@@ -68,9 +68,8 @@ def main_loop():
         # Grab the image of the the face from the current frame of video
         if (len(face_locations) > 0):
           top, right, bottom, left = face_locations[0]
-          face_image = small_frame[top:bottom, left:right]
-          face_image = cv2.resize(face_image, (150, 150))
-          #face_label = f"Left: {left}"
+          # face_image = small_frame[top:bottom, left:right]
+          # face_image = cv2.resize(face_image, (150, 150))
           
           error = left - view_position_center
           if (abs(error) > position_tolerance):
@@ -82,6 +81,7 @@ def main_loop():
             robot.stop()
           print (left, error)
         else:
+          robot.stop()
           print ("no faces")
 
     except:
