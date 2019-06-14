@@ -23,7 +23,7 @@ def running_on_jetson_nano():
     return platform.machine() == "aarch64"
 
 
-def get_jetson_gstreamer_source(capture_width=1280, capture_height=720, display_width=1280, display_height=720, framerate=60, flip_method=0):
+def get_jetson_gstreamer_source(capture_width=1280, capture_height=720, display_width=1280, display_height=720, framerate=5, flip_method=0): # was framerate=60
     """
     Return an OpenCV-compatible video source description that uses gstreamer to capture video from the camera on a Jetson Nano
     """
@@ -49,6 +49,8 @@ def main_loop():
     robot = Robot()
 
     print ("beginning Jetbot face recognition loop")
+    
+    noface_count = 0
 
     try:
       while True:
@@ -67,11 +69,19 @@ def main_loop():
 
         # Grab the image of the the face from the current frame of video
         if (len(face_locations) > 0):
-          top, right, bottom, left = face_locations[0]
-          # face_image = small_frame[top:bottom, left:right]
-          # face_image = cv2.resize(face_image, (150, 150))
+          noface_count = 0
+          max_width = 0
+          closest_face_left = 0
+          closest_face_right = 0
+          for location in face_locations:
+            top, right, bottom, left = location
+            width = right - left
+            if (width > max_width):
+              max_width = width
+              closest_face_left = left
+              closest_face_right = right
           
-          error = left - view_position_center
+          error = closest_face_left - view_position_center
           if (abs(error) > position_tolerance):
             if (error > 0):
               robot.left(speed=swivel_speed)
@@ -79,12 +89,17 @@ def main_loop():
               robot.right(speed=swivel_speed)
           else:
             robot.stop()
-          print (left, error)
+          with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
+            f.write("{} {}".format(closest_face_left, closest_face_right))
         else:
           robot.stop()
-          print ("no faces")
+          noface_count += 1
+          with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
+            f.write("{}".format(noface_count))
 
     except:
+      with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
+        f.write("crashed")
       # Release handle to the webcam
       print ("cleaning up after jetbot")
       video_capture.release()

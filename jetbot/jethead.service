@@ -1,0 +1,14 @@
+
+[Unit]
+Description=Jethead face tracking service
+
+[Service]
+Type=simple
+User=jetbot
+ExecStart=/bin/sh -c "python3 /home/jetbot/DelmarBots/jetbot/jetbot-doorcam.py"
+WorkingDirectory=/home/jetbot
+Restart=always
+WatchdogSec=300
+
+[Install]
+WantedBy=multi-user.target
