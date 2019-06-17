@@ -4,12 +4,15 @@ from datetime import datetime, timedelta
 import numpy as np
 import platform
 import pickle
+import threading
+import time
 
 from jetbot import Robot
 
-position_tolerance = 40
-view_position_center = 125
+position_tolerance = 20
+view_position_center = 175 # was 125
 swivel_speed = 0.2
+swivel_duration = 0.5
 
 # Our list of known face encodings and a matching list of metadata about each face.
 known_face_encodings = []
@@ -35,6 +38,10 @@ def get_jetson_gstreamer_source(capture_width=1280, capture_height=720, display_
             f'video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! ' +
             'videoconvert ! video/x-raw, format=(string)BGR ! appsink'
             )
+
+def stop_motors_later(robot):
+    time.sleep(swivel_duration)
+    robot.stop()
 
 def main_loop():
     # Get access to the webcam. The method is different depending on if this is running on a laptop or a Jetson Nano.
@@ -81,16 +88,17 @@ def main_loop():
               closest_face_left = left
               closest_face_right = right
           
-          error = closest_face_left - view_position_center
+          error = closest_face_left + max_width / 2 - view_position_center
           if (abs(error) > position_tolerance):
             if (error > 0):
               robot.left(speed=swivel_speed)
             else:
               robot.right(speed=swivel_speed)
+            x = threading.Thread(target=stop_motors_later, args=(robot,))
           else:
             robot.stop()
           with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
-            f.write("{} {}".format(closest_face_left, closest_face_right))
+            f.write("{} {} {}".format(closest_face_left, closest_face_right, error))
         else:
           robot.stop()
           noface_count += 1
