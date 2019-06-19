@@ -9,10 +9,10 @@ import time
 
 from jetbot import Robot
 
-position_tolerance = 20
-view_position_center = 175 # was 125
+position_tolerance = 30
+view_position_center = 170 # was 125
 swivel_speed = 0.2
-swivel_duration = 0.5
+swivel_duration = 0.2
 
 # Our list of known face encodings and a matching list of metadata about each face.
 known_face_encodings = []
@@ -41,6 +41,12 @@ def get_jetson_gstreamer_source(capture_width=1280, capture_height=720, display_
 
 def stop_motors_later(robot):
     time.sleep(swivel_duration)
+    robot.stop()
+
+def swivel_for_time(robot, speed, duration):
+    #robot.set_motors(speed, speed)
+    robot.left_motor.value = speed
+    time.sleep(duration)
     robot.stop()
 
 def main_loop():
@@ -91,10 +97,12 @@ def main_loop():
           error = closest_face_left + max_width / 2 - view_position_center
           if (abs(error) > position_tolerance):
             if (error > 0):
-              robot.left(speed=swivel_speed)
+              x = threading.Thread(target=swivel_for_time, args=(robot,-swivel_speed,swivel_duration,)) # was robot.left(speed=swivel_speed)
             else:
-              robot.right(speed=swivel_speed)
-            x = threading.Thread(target=stop_motors_later, args=(robot,))
+              x = threading.Thread(target=swivel_for_time, args=(robot,swivel_speed,.1,)) # was robot.right(speed=swivel_speed)
+            #x = threading.Thread(target=stop_motors_later, args=(robot,))
+            x.start()
+            time.sleep(.1)
           else:
             robot.stop()
           with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
