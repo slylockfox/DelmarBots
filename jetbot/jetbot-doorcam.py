@@ -100,9 +100,8 @@ def main_loop():
               x = threading.Thread(target=swivel_for_time, args=(robot,-swivel_speed,swivel_duration,)) # was robot.left(speed=swivel_speed)
             else:
               x = threading.Thread(target=swivel_for_time, args=(robot,swivel_speed,.1,)) # was robot.right(speed=swivel_speed)
-            #x = threading.Thread(target=stop_motors_later, args=(robot,))
             x.start()
-            time.sleep(.1)
+            #time.sleep(.1)
           else:
             robot.stop()
           with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
