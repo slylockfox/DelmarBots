@@ -10,9 +10,10 @@ import time
 from jetbot import Robot
 
 position_tolerance = 30
-view_position_center = 170 # was 125
+view_position_center = 190 # was 125
 swivel_speed = 0.2
 swivel_duration = 0.2
+max_led_power = 0.7
 
 # Our list of known face encodings and a matching list of metadata about each face.
 known_face_encodings = []
@@ -48,8 +49,25 @@ def swivel_for_time(robot, speed, duration):
     robot.left_motor.value = speed
     time.sleep(duration)
     robot.stop()
+    
+def toggle_led(robot, p):
+    global led_power
+    if (led_power == 0):
+        led_power = p
+    else:
+        led_power = 0
+    robot.right_motor.value = led_power
+
+def toggle_red_led(robot):
+    toggle_led(robot, max_led_power)
+
+def toggle_green_led(robot):
+    toggle_led(robot, -max_led_power)
 
 def main_loop():
+    global led_power
+    led_power = max_led_power
+    
     # Get access to the webcam. The method is different depending on if this is running on a laptop or a Jetson Nano.
     if running_on_jetson_nano():
         # Accessing the camera with OpenCV on a Jetson Nano requires gstreamer with a custom gstreamer source string
@@ -106,12 +124,15 @@ def main_loop():
             robot.stop()
           with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
             f.write("{} {} {}".format(closest_face_left, closest_face_right, error))
+          toggle_green_led(robot) # show heartbeat with red led
+
         else:
           robot.stop()
           noface_count += 1
           with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
             f.write("{}".format(noface_count))
-
+          toggle_red_led(robot) # show heartbeat with red led
+            
     except:
       with open("/home/jetbot/jethead-stats.txt",'w',encoding = 'utf-8') as f:
         f.write("crashed")
