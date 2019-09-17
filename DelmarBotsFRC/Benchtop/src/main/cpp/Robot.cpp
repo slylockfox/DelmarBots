@@ -82,7 +82,6 @@ void Robot::AutonomousPeriodic() {
   }
 }
 
-#define MOTOR_SCALE 1.7
 #define TARGET_TOLERANCE_V 4
 #define TARGET_TOLERANCE_H 8
 #define LIMELIGHT_ANGLE_DEFAULT 65
@@ -92,6 +91,8 @@ void Robot::AutonomousPeriodic() {
 using namespace std;
 
 void Robot::TeleopPeriodic() {
+
+#ifdef LIMELIGHT
 
   bool ok_to_pursue_button_presssed = m_stick.GetRawButton(2);
   bool not_ok_to_pursue_button_presssed = m_stick.GetRawButton(3);
@@ -161,9 +162,21 @@ void Robot::TeleopPeriodic() {
 
   } else {  // no vision target seen
     //   leave vertical alone, was... m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
+foo
+#else
+  // no Limelight; this is GRC 2019 robot
+  bool slow_gear_button_pressed = m_stick.GetRawButton(3);
+  bool high_gear_button_presssed = m_stick.GetRawButton(2);
+  if (slow_gear_button_pressed) {speed_factor = kSlowSpeedFactor;}
+  else if (high_gear_button_presssed) {speed_factor = 1;}
+#endif
+
     // Drive with arcade style (use right stick)    
-    m_robotDrive.ArcadeDrive(-m_stick.GetY()/MOTOR_SCALE, m_stick.GetX()/MOTOR_SCALE); // MJS: not so fast
+    m_robotDrive.ArcadeDrive(-m_stick.GetY()/speed_factor, m_stick.GetX()/speed_factor); // MJS: not so fast
+
+#ifdef LIMELIGHT
   }
+#endif
 
 }
 

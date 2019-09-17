@@ -41,6 +41,7 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
+  const double kSlowSpeedFactor = 1.7;
   std::string m_autoSelected;
   std::shared_ptr<NetworkTable> m_limetable;  // for LimeLight
 
@@ -55,6 +56,7 @@ class Robot : public frc::TimedRobot {
   frc::Servo m_limeServo{2};
   double m_limeServoAngle = 90.0;
   bool m_okToPursue = false;
+  double speed_factor = kSlowSpeedFactor;
 
 
 
