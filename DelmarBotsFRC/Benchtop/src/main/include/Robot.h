@@ -47,7 +47,10 @@ class Robot : public frc::TimedRobot {
 
   // Robot drive system  
   frc::Talon m_left{0};  
-  frc::Talon m_right{1};  
+  frc::Talon m_right{1}; 
+
+  frc::Talon m_chainsaw{2};
+
   frc::DifferentialDrive m_robotDrive{m_left, m_right};
   frc::Joystick m_stick{0};  
   frc::Joystick m_stick_copilot{1};  

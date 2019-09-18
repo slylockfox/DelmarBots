@@ -173,6 +173,12 @@ foo
 
     // Drive with arcade style (use right stick)    
     m_robotDrive.ArcadeDrive(-m_stick.GetY()/speed_factor, m_stick.GetX()/speed_factor); // MJS: not so fast
+    double chainsaw_speed = 0; //m_stick.GetRawAxis(3);
+    if (m_stick.GetPOV(0) == 0) {chainsaw_speed = 0.3;}
+    else if (m_stick.GetPOV(0) == 180) {chainsaw_speed = -0.3;}
+    frc::SmartDashboard::PutNumber ("DB/POV", m_stick.GetPOV(0));
+    frc::SmartDashboard::PutNumber ("DB/Chainsaw Speed", chainsaw_speed);
+    m_chainsaw.Set(chainsaw_speed);
 
 #ifdef LIMELIGHT
   }
