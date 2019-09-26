@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <algorithm>  // for min and max
+#include <math.h>
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
@@ -18,6 +19,7 @@
 void Robot::RobotInit() {
   m_limetable = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
   m_robotDrive.SetRightSideInverted(true);
+
   //m_left.SetInverted(true);
   //m_right.SetInverted(true);
 
@@ -165,20 +167,64 @@ void Robot::TeleopPeriodic() {
 foo
 #else
   // no Limelight; this is GRC 2019 robot
+
+  // pilot controls
   bool slow_gear_button_pressed = m_stick.GetRawButton(3);
   bool high_gear_button_presssed = m_stick.GetRawButton(2);
   if (slow_gear_button_pressed) {speed_factor = kSlowSpeedFactor;}
   else if (high_gear_button_presssed) {speed_factor = 1;}
+  frc::SmartDashboard::PutNumber ("DB/Drive Speed Factor", speed_factor);
+
 #endif
 
-    // Drive with arcade style (use right stick)    
-    m_robotDrive.ArcadeDrive(-m_stick.GetY()/speed_factor, m_stick.GetX()/speed_factor); // MJS: not so fast
+    // switch states
+    bool lift_at_bottom = !m_bottom_switch.Get();
+    bool lift_at_top = !m_top_switch.Get();
+    frc::SmartDashboard::PutNumber ("DB/Switch Bottom", lift_at_bottom);
+    frc::SmartDashboard::PutNumber ("DB/Switch Top", lift_at_top);
+
+    // Drive with arcade style (use right stick)   
+    double drive_speed_X = m_stick.GetX()/speed_factor;
+    double drive_speed_Y = m_stick.GetY()/speed_factor;
+    frc::SmartDashboard::PutNumber ("DB/Drive Speed X", drive_speed_X);
+    frc::SmartDashboard::PutNumber ("DB/Drive Speed Y", drive_speed_Y);
+    m_robotDrive.ArcadeDrive(-drive_speed_Y, drive_speed_X); // MJS: not so fast
+
+    // co-pilot controls chainsaw
     double chainsaw_speed = 0; //m_stick.GetRawAxis(3);
-    if (m_stick.GetPOV(0) == 0) {chainsaw_speed = 0.3;}
-    else if (m_stick.GetPOV(0) == 180) {chainsaw_speed = -0.3;}
+    if (m_stick_copilot.GetPOV(0) == 0) {chainsaw_speed = 0.3;}
+    else if (m_stick_copilot.GetPOV(0) == 180) {chainsaw_speed = -0.3;}
     frc::SmartDashboard::PutNumber ("DB/POV", m_stick.GetPOV(0));
     frc::SmartDashboard::PutNumber ("DB/Chainsaw Speed", chainsaw_speed);
     m_chainsaw.Set(chainsaw_speed);
+
+    // co-pilot controls dart
+    double dart_speed_Y = m_stick_copilot.GetRawAxis(3);
+    frc::SmartDashboard::PutNumber ("DB/Dart Speed", dart_speed_Y);
+    if (abs(dart_speed_Y) < 0.1){
+      dart_speed_Y = 0.0;
+    }
+    m_chainsaw_dart.Set(dart_speed_Y);
+
+    // co-pilot controls lift
+     double lift_speed_Y = m_stick_copilot.GetRawAxis(1);
+    frc::SmartDashboard::PutNumber ("DB/Lift Speed", lift_speed_Y);
+    if (abs(lift_speed_Y) < 0.1){ // dead zone
+      lift_speed_Y = 0.0;
+    }
+    bool ok_to_drive_lift = false;
+    if (lift_speed_Y > 0 && !lift_at_bottom) { // not at bottom, so ok to go down
+      ok_to_drive_lift = true;
+    } else if (lift_speed_Y < 0 && !lift_at_top) { // not at top, so ok to go up
+      ok_to_drive_lift = true;
+    }
+    if (ok_to_drive_lift) { 
+      m_lift.Set(lift_speed_Y); 
+    } else {
+      m_lift.Set(0); 
+    }
+    
+
 
 #ifdef LIMELIGHT
   }

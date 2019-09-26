@@ -14,8 +14,11 @@
 
 #include <frc/Joystick.h>
 #include <frc/Talon.h>
+#include <frc/Victor.h>
+#include <frc/Spark.h>
 #include <frc/Timer.h>
 #include <frc/Servo.h>
+#include <frc/DigitalInput.h>
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/livewindow/LiveWindow.h>
 
@@ -49,7 +52,13 @@ class Robot : public frc::TimedRobot {
   frc::Talon m_left{0};  
   frc::Talon m_right{1}; 
 
-  frc::Talon m_chainsaw{2};
+  frc::Victor m_chainsaw{7};
+  frc::Spark m_chainsaw_dart{6};
+
+  frc::Spark m_lift{3};
+
+  frc::DigitalInput m_bottom_switch{9};
+  frc::DigitalInput m_top_switch{8};
 
   frc::DifferentialDrive m_robotDrive{m_left, m_right};
   frc::Joystick m_stick{0};  
