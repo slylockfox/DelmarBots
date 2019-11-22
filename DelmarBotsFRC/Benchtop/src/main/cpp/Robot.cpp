@@ -50,6 +50,10 @@ void Robot::RobotPeriodic() {}
  * make sure to add them to the chooser code above as well.
  */
 void Robot::AutonomousInit() {
+
+  TeleopInit();
+
+#if FALSE
   m_autoSelected = m_chooser.GetSelected();
   // m_autoSelected = SmartDashboard::GetString("Auto Selector",
   //     kAutoNameDefault);
@@ -62,9 +66,15 @@ void Robot::AutonomousInit() {
     m_timer.Reset();
     m_timer.Start();
   }
+#endif
 }
 
+
 void Robot::AutonomousPeriodic() {
+
+  TeleopPeriodic();
+
+#if FALSE
   if (m_autoSelected == kAutoNameCustom) {
     // Custom Auto goes here
   } else {
@@ -82,6 +92,7 @@ void Robot::AutonomousPeriodic() {
       m_robotDrive.ArcadeDrive(0.0, 0.0);
     }
   }
+#endif
 }
 
 #define TARGET_TOLERANCE_V 4
@@ -164,7 +175,7 @@ void Robot::TeleopPeriodic() {
 
   } else {  // no vision target seen
     //   leave vertical alone, was... m_limeServo.SetAngle(LIMELIGHT_ANGLE_DEFAULT);
-foo
+
 #else
   // no Limelight; this is GRC 2019 robot
 
@@ -192,14 +203,14 @@ foo
 
     // co-pilot controls chainsaw
     double chainsaw_speed = 0; //m_stick.GetRawAxis(3);
-    if (m_stick_copilot.GetPOV(0) == 0) {chainsaw_speed = 0.3;}
-    else if (m_stick_copilot.GetPOV(0) == 180) {chainsaw_speed = -0.3;}
+    if (m_stick_copilot.GetPOV(0) == 0) {chainsaw_speed = -0.3;}
+    else if (m_stick_copilot.GetPOV(0) == 180) {chainsaw_speed = 0.3;}
     frc::SmartDashboard::PutNumber ("DB/POV", m_stick.GetPOV(0));
     frc::SmartDashboard::PutNumber ("DB/Chainsaw Speed", chainsaw_speed);
     m_chainsaw.Set(chainsaw_speed);
 
     // co-pilot controls dart
-    double dart_speed_Y = m_stick_copilot.GetRawAxis(3);
+    double dart_speed_Y = -m_stick_copilot.GetRawAxis(3);
     frc::SmartDashboard::PutNumber ("DB/Dart Speed", dart_speed_Y);
     if (abs(dart_speed_Y) < 0.1){
       dart_speed_Y = 0.0;
