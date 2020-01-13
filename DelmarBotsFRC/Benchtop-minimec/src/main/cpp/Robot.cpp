@@ -6,10 +6,9 @@
 /*----------------------------------------------------------------------------*/
 
 #include "Robot.h"
-
 #include <iostream>
-
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <wpi/raw_ostream.h> // for logging to riolog window
 
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
@@ -88,12 +87,19 @@ void Robot::AutonomousPeriodic() {
 }
 
 #define MOTOR_SCALE 1.7
+#define DEADZONE 0.1
 void Robot::TeleopPeriodic() {
+  wpi::outs() << "teleop loop";
   bool reset_yaw_button_pressed = m_stick.GetRawButton(1);
   if ( reset_yaw_button_pressed ) {
       ahrs->ZeroYaw();
   }
-  m_robotDrive.DriveCartesian(-m_stick.GetRawAxis(2), m_stick.GetRawAxis(3), -m_stick.GetRawAxis(0), -ahrs->GetAngle()); // MJS: navx heading
+  
+  double xspeed = abs(m_stick.GetRawAxis(2)) > DEADZONE ? -m_stick.GetRawAxis(2) : 0;
+  double yspeed = abs(m_stick.GetRawAxis(3)) > DEADZONE ? m_stick.GetRawAxis(3) : 0;
+  double zspeed = abs(m_stick.GetRawAxis(0)) > DEADZONE ? -m_stick.GetRawAxis(0) : 0;
+
+  m_robotDrive.DriveCartesian(xspeed, yspeed, zspeed, -ahrs->GetAngle()); // MJS: navx heading
 }
 
 void Robot::TestPeriodic() {}

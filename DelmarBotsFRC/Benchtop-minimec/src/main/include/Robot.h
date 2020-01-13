@@ -56,8 +56,8 @@ class Robot : public frc::TimedRobot {
   std::string m_autoSelected;
 
   // Robot drive system  
-  frc::Talon m_leftRear{0};  
-  frc::Talon m_leftFront{1};  
+  frc::Talon m_leftRear{0, 1};  
+  frc::Talon m_leftFront{1, 1};  
   frc::Talon m_rightRear{2};  
   frc::Talon m_rightFront{3};  
   frc::MecanumDrive m_robotDrive{m_leftFront, m_leftRear, m_rightFront, m_rightRear};
