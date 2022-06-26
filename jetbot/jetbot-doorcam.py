@@ -12,7 +12,6 @@ from jetbot import Robot
 position_tolerance = 10
 view_position_center = 140 # was 125
 # multiply error * P instead, was... swivel_speed = 0.4
-# multiply error * P instead, was... 
 swivel_duration = 0.2
 swivel_P = .0035
 max_led_power = 0.7
