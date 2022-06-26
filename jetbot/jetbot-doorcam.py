@@ -9,10 +9,12 @@ import time
 
 from jetbot import Robot
 
-position_tolerance = 30
-view_position_center = 190 # was 125
-swivel_speed = 0.2
+position_tolerance = 10
+view_position_center = 140 # was 125
+# multiply error * P instead, was... swivel_speed = 0.4
+# multiply error * P instead, was... 
 swivel_duration = 0.2
+swivel_P = .0035
 max_led_power = 0.7
 
 # Our list of known face encodings and a matching list of metadata about each face.
@@ -114,6 +116,7 @@ def main_loop():
           
           error = closest_face_left + max_width / 2 - view_position_center
           if (abs(error) > position_tolerance):
+            swivel_speed = abs(error) * swivel_P # was 0.2
             if (error > 0):
               x = threading.Thread(target=swivel_for_time, args=(robot,-swivel_speed,swivel_duration,)) # was robot.left(speed=swivel_speed)
             else:
